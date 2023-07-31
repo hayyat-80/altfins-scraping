@@ -1,0 +1,2 @@
+class TechnicalAnalysisRecord < ApplicationRecord
+end

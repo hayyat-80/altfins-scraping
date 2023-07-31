@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  update_date: MyString
+  asset_symbol: MyString
+  asset_name: MyString
+  description: MyText
+  image_src: MyString
+  near_term_outlook: MyString
+  pattern_type: MyString
+  patter_stage: MyString
+
+two:
+  update_date: MyString
+  asset_symbol: MyString
+  asset_name: MyString
+  description: MyText
+  image_src: MyString
+  near_term_outlook: MyString
+  pattern_type: MyString
+  patter_stage: MyString
