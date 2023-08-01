@@ -1,6 +1,8 @@
-class FetchDataService
-  require 'selenium-webdriver'
+require 'selenium-webdriver'
+require 'down'
+require 'aws-sdk-s3'
 
+class FetchDataService
   def self.fetch_data
     login_url = 'https://altfins.com/login'
     url = 'https://altfins.com/technical-analysis'
@@ -64,12 +66,29 @@ class FetchDataService
       record.asset_symbol = d[1]
       record.asset_name = d[2]
       record.description = d[3][:desp]
-      record.image_src = d[3][:img_src]
+      record.image_src = upload_to_s3(d[3][:img_src])
       record.near_term_outlook = d[4]
       record.pattern_type = d[5]
       record.patter_stage = d[7]
       record.save
     end
+  end
+
+  def self.upload_to_s3(image_url)
+    s3_client = Aws::S3::Resource.new(
+      access_key_id: ENV['S3_ACCESS_KEY_ID'],
+      secret_access_key: ENV['S3_SECRET_ACCESS_KEY'],
+      region: ENV['S3_REGION']
+    )
+
+    image_data = Down.download(image_url)
+
+    obj = s3_client.bucket(ENV['S3_BUCKET']).object("images/#{SecureRandom.uuid}.jpg")
+    obj.upload_file(image_data.path, acl: 'public-read')
+
+    obj.public_url
+  rescue StandardError
+    image_url
   end
 end
 
