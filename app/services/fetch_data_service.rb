@@ -12,11 +12,12 @@ class FetchDataService
     driver = Selenium::WebDriver.for :chrome, options: options
 
     driver.get(login_url)
+    sleep 10
     username_field = driver.find_element(id: 'vaadinLoginUsername')
     password_field = driver.find_element(id: 'vaadinLoginPassword')
 
-    username = 'imran@crepprotect.com'
-    password = 'Tradedork00!'
+    username = ENV['ALTFINS_USERNAME']
+    password = ENV['ALTFINS_PASSWORD']
 
     driver.execute_script("arguments[0].value = arguments[1];", username_field, username)
     driver.execute_script("arguments[0].value = arguments[1];", password_field, password)
@@ -25,6 +26,7 @@ class FetchDataService
     driver.execute_script("arguments[0].click();", login_button)
 
     driver.get(url)
+    sleep 10
     page_count = driver.find_elements(css: 'div.paginator-wrapper')[1].find_elements(tag_name: 'span')[1].text.match(/\d+/)[0].to_i
     data = []
     page_count.times do |i|

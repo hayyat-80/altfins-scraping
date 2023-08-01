@@ -11,10 +11,7 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.0].define(version: 2023_07_31_220836) do
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
-
-  create_table "technical_analysis_records", force: :cascade do |t|
+  create_table "technical_analysis_records", charset: "utf8mb3", force: :cascade do |t|
     t.string "update_date"
     t.string "asset_symbol"
     t.string "asset_name"
