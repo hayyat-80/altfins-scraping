@@ -50,7 +50,7 @@ class FetchDataService
           sub_data << c.text
         elsif c.text == 'inspect'
           driver.execute_script("arguments[0].click();", c)
-          sleep 5
+          sleep 10
           driver.execute_script("arguments[0].scrollIntoView(true);", c)
           cell_no = c.attribute('slot').match(/\d+/)[0].to_i + 4
           inspected_cell = grid.find_element(css: "vaadin-grid-cell-content[slot='vaadin-grid-cell-content-#{cell_no}']")
@@ -63,16 +63,19 @@ class FetchDataService
     end
     data = data.reject {|subarray| subarray == ["Updated Date", "Asset Symbol", "Asset Name", "Chart View", "Near Term Outlook", "Pattern Type", "Pattern Stage", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}
     data.each do |d|
-      record = TechnicalAnalysisRecord.new
-      record.update_date = d[0]
-      record.asset_symbol = d[1]
-      record.asset_name = d[2]
-      record.description = d[3][:desp]
-      record.image_src = upload_to_s3(d[3][:img_src])
-      record.near_term_outlook = d[4]
-      record.pattern_type = d[5]
-      record.patter_stage = d[7]
-      record.save
+      record = TechnicalAnalysisRecord.where(update_date: d[0], asset_name: d[2])
+      unless record.present?
+        record = TechnicalAnalysisRecord.new
+        record.update_date = d[0]
+        record.asset_symbol = d[1]
+        record.asset_name = d[2]
+        record.description = d[3][:desp]
+        record.image_src = upload_to_s3(d[3][:img_src])
+        record.near_term_outlook = d[4]
+        record.pattern_type = d[5]
+        record.patter_stage = d[7]
+        record.save
+      end
     end
   end
 
