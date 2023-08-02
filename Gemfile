@@ -77,4 +77,4 @@ gem "selenium-webdriver"
 gem 'aws-sdk-s3'
 gem 'down'
 gem 'dotenv-rails', '~> 2.1', '>= 2.1.1'
-
+gem 'whenever', require: false
