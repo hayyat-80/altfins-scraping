@@ -7,6 +7,7 @@ class FetchDataService
     login_url = 'https://altfins.com/login'
     url = 'https://altfins.com/technical-analysis'
     
+    Webdrivers::Chromedriver.required_version = ENV['DRIVER_VERSION']
     options = Selenium::WebDriver::Chrome::Options.new
     options.add_argument('--headless')
     driver = Selenium::WebDriver.for :chrome, options: options
