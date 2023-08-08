@@ -30,13 +30,16 @@ class FetchDataService
     sleep 10
     page_count = driver.find_elements(css: 'div.paginator-wrapper')[1].find_elements(tag_name: 'span')[1].text.match(/\d+/)[0].to_i
     data = []
-    page_count.times do |i|
-      puts "page no #{i+1}"
-      input_element = driver.find_element(css: 'input[slot="input"][type="text"][title="60 items"]')
-      driver.execute_script("arguments[0].value = arguments[1];", input_element, i+1)
-      # Trigger the Enter key press event using JavaScript
-      driver.execute_script("arguments[0].dispatchEvent(new Event('keydown', {bubbles: true, cancelable: true, keyCode: 13}));", input_element)
-      sleep 5
+    (1..page_count).each do |i|
+      page_no = i
+      puts "Page no #{page_no}"
+      if page_no > 1
+        next_button = driver.find_element(css: 'vaadin-button[theme="icon tertiary"][id="nis-paging-bar-nextPage-button"]')
+
+        # Trigger the Enter key press event using JavaScript
+        driver.execute_script("arguments[0].click();", next_button)
+        sleep 10
+      end
 
       grid = driver.find_element(tag_name: 'vaadin-grid')
       # data = grid.text.split("\n")
