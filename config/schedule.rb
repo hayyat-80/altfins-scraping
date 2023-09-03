@@ -21,6 +21,6 @@
 
 set :output, "log/cron.log"
 
-every 1.day, at: '00:01' do
+every 1.day, at: '14:00' do
   rake "scraper:run_fetching"
 end

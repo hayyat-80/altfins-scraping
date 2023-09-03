@@ -29,6 +29,8 @@ class FetchDataService
     driver.get(url)
     sleep 10
     page_count = driver.find_elements(css: 'div.paginator-wrapper')[1].find_elements(tag_name: 'span')[1].text.match(/\d+/)[0].to_i
+    puts "Time service run => #{Time.zone.today}"
+    puts "Total Pages: #{page_count}"
     data = []
     (1..page_count).each do |i|
       page_no = i
@@ -67,20 +69,54 @@ class FetchDataService
     end
     data = data.reject {|subarray| subarray == ["Updated Date", "Asset Symbol", "Asset Name", "Chart View", "Near Term Outlook", "Pattern Type", "Pattern Stage", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}
     data.each do |d|
+      cp = CurrencyPair.where(label: d[2], symbol: d[1])
+      unless cp.present?
+        # cp.image = upload_to_s3()
+        cp = CurrencyPair.new
+        cp.label = d[2]
+        cp.symbol = d[1]
+        cp.save
+      end
       record = TechnicalAnalysisRecord.where(update_date: d[0], asset_name: d[2])
       unless record.present?
+        description = d[3][:desp]
+        # Extracting trade setup information
+        trade_setup = description.scan(/Trade setup: (.+?)\n/).flatten.first
+        # Extracting trend information
+        trend = description.scan(/Trend: (.+?)\n/).flatten.first
+        # Extracting pattern information
+        pattern = description.scan(/Pattern: (.+?)\n/).flatten.first
+        # Extracting momentum information
+        momentum = description.scan(/Momentum is (.+?)\n/).flatten.first
+        # Extracting support and resistance information
+        support_resistance = text.match(/Support and Resistance: (.+)/)&.captures&.first
+        # upload image to s3
+        t_image_src = upload_to_s3(d[3][:img_src])
+
         record = TechnicalAnalysisRecord.new
         record.update_date = d[0]
         record.asset_symbol = d[1]
         record.asset_name = d[2]
-        record.description = d[3][:desp]
-        record.image_src = upload_to_s3(d[3][:img_src])
+        record.description = description
+        record.image_src = t_image_src
         record.near_term_outlook = d[4]
         record.pattern_type = d[5]
         record.patter_stage = d[7]
         record.save
+
+        technical_analyses = TechnicalAnalysis.new
+        technical_analyses.currency_pair_id = cp.id
+        technical_analyses.trade_setup = trade_setup
+        technical_analyses.trend = trend
+        technical_analyses.pattern = pattern
+        technical_analyses.momentum = momentum
+        technical_analyses.support_resistance = support_resistance
+        technical_analyses.image = t_image_src
+        technical_analyses.save
       end
     end
+  rescue StandardError => e
+    puts "Error Occured: #{e.message}"
   end
 
   def self.upload_to_s3(image_url)
